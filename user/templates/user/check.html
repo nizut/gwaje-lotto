@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>당첨 결과 조회</title>
+  <style>
+    body { font-family: sans-serif; max-width: 760px; margin: 24px auto; padding: 0 12px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 12px 0; }
+    .error { color: #b71c1c; margin: 10px 0; }
+    .win { color: #1b5e20; font-weight: 700; }
+    .lose { color: #333; }
+    label { display: block; margin: 8px 0 4px; }
+    input[type="text"] { width: 100%; max-width: 360px; padding: 8px; box-sizing: border-box; }
+    button { margin-top: 12px; padding: 8px 14px; }
+    .ticket { padding: 8px 0; border-bottom: 1px dashed #ddd; }
+    .ticket:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+  <h1>당첨 결과 조회</h1>
+  <p>구매 ID 또는 티켓 번호(UUID)로 조회할 수 있습니다.</p>
+
+  <form method="get">
+    <div class="card">
+      <label for="purchase_id">구매 ID</label>
+      <input type="text" id="purchase_id" name="purchase_id" value="{{ purchase_id }}" placeholder="예: 12">
+
+      <label for="ticket_number">티켓 번호</label>
+      <input type="text" id="ticket_number" name="ticket_number" value="{{ ticket_number }}" placeholder="예: 550e8400-e29b-41d4-a716-446655440000">
+
+      <button type="submit">조회하기</button>
+    </div>
+  </form>
+
+  {% if error_message %}
+    <div class="error">{{ error_message }}</div>
+  {% endif %}
+
+  {% if result %}
+    <div class="card">
+      <h2>조회된 회차: {{ result.round.round_number }}</h2>
+      <p>
+        당첨번호:
+        {% for n in result.round.win_numbers %}
+          {{ n }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        / 보너스: {{ result.round.bonus_number }}
+      </p>
+
+      <h3>티켓 결과</h3>
+      {% for item in result.tickets %}
+        <div class="ticket">
+          <p>티켓: {{ item.ticket.ticket_number }}</p>
+          <p>번호: {{ item.ticket.numbers|join:", " }}</p>
+          {% if item.rank %}
+            <p class="win">결과: {{ item.rank }}등</p>
+          {% else %}
+            <p class="lose">결과: 꽝</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <p>
+    <a href="{% url 'user:index' %}">홈으로</a>
+    |
+    <a href="{% url 'user:purchase' %}">구매 페이지로</a>
+  </p>
+</body>
+</html>

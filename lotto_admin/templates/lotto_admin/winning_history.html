@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>당첨 내역</title>
+  <style>
+    body { font-family: sans-serif; max-width: 980px; margin: 24px auto; padding: 0 12px; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 14px; margin: 14px 0; }
+    .ticket { border-top: 1px dashed #ddd; padding-top: 8px; margin-top: 8px; }
+    .muted { color: #666; }
+    .win { color: #1b5e20; font-weight: 700; }
+    a { color: #0b57d0; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h1>당첨 내역 확인</h1>
+
+  <div class="card">
+    {% for result in winning_results %}
+      <div class="ticket">
+        <p><strong>회차:</strong> {{ result.ticket.purchase.round.round_number }}</p>
+        <p><strong>티켓:</strong> {{ result.ticket.ticket_number }}</p>
+        <p class="muted"><strong>번호:</strong> {{ result.ticket.numbers|join:", " }}</p>
+        <p>
+          <strong>등수:</strong>
+          {% if result.rank %}
+            <span class="win">{{ result.rank }}등</span>
+          {% else %}
+            꽝
+          {% endif %}
+        </p>
+      </div>
+    {% empty %}
+      <p>당첨 내역이 없습니다.</p>
+    {% endfor %}
+  </div>
+
+  <p>
+    <a href="{% url 'lotto_admin:index' %}">홈으로</a>
+    |
+    <a href="{% url 'lotto_admin:sales_history' %}">판매 내역</a>
+    |
+    <a href="{% url 'lotto_admin:draw_lottery' %}">추첨 화면</a>
+  </p>
+</body>
+</html>

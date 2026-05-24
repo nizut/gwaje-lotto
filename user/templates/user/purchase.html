@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>로또 번호 구매</title>
+  <style>
+    body { font-family: sans-serif; max-width: 720px; margin: 24px auto; padding: 0 12px; }
+    .error { color: #c62828; margin-bottom: 8px; }
+    .actions { margin-top: 16px; display: flex; gap: 8px; }
+    .mode-row { display: flex; gap: 14px; margin: 10px 0 14px; }
+    .qty-row { margin: 10px 0 12px; }
+    .auto-help { margin: 8px 0 12px; color: #444; }
+    .hidden { display: none; }
+    #numbers-wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .num-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    box-sizing: border-box;
+  }
+  </style>
+</head>
+<body>
+  <h1>로또 번호 구매</h1>
+  <p>모드를 선택하고 매수를 입력한 뒤 구매하세요.</p>
+
+<form method="post">
+  {% csrf_token %}
+
+  <div class="mode-row">
+    <label>
+      <input type="radio" name="mode" value="manual" {% if mode == 'manual' %}checked{% endif %}>
+      수동
+    </label>
+    <label>
+      <input type="radio" name="mode" value="semi" {% if mode == 'semi' %}checked{% endif %}>
+      반자동
+    </label>
+    <label>
+      <input type="radio" name="mode" value="auto" {% if mode == 'auto' %}checked{% endif %}>
+      자동
+    </label>
+  </div>
+
+  <div class="qty-row">
+    <label for="id_quantity">매수 (1~10)</label>
+    {{ form.quantity }}
+    {% if form.quantity.errors %}
+      <div class="error">{{ form.quantity.errors }}</div>
+    {% endif %}
+  </div>
+
+  {% if form.non_field_errors %}
+    <div class="error">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  {% if form.numbers.errors %}
+    <div class="error">
+      {{ form.numbers.errors }}
+    </div>
+  {% endif %}
+
+  <section id="manual-section">
+  <p>수동/반자동: 1~45에서 번호를 고르세요. 반자동은 부족한 개수를 랜덤으로 채웁니다.</p>
+  <div id="numbers-wrap">
+  {% for checkbox in form.numbers %}
+    <label class="num-item">
+      {{ checkbox.tag }}
+      <span>{{ checkbox.choice_label }}</span>
+    </label>
+  {% endfor %}
+  </div>
+
+  <p>선택 개수: <span id="selected-count">0</span> / 6</p>
+  <button type="button" id="auto-fill-btn">부족 번호 자동 채우기</button>
+  </section>
+
+  <section id="auto-section" class="hidden">
+    <p class="auto-help">자동 모드는 티켓마다 서로 다른 랜덤 번호 6개를 생성합니다.</p>
+  </section>
+
+  <div class="actions">
+    <button type="submit">구매하기</button>
+  </div>
+</form>
+
+<a href="{% url 'user:index' %}">메인으로 돌아가기</a>
+
+<script>
+  (function () {
+    const checkboxes = Array.from(document.querySelectorAll('input[name="numbers"]'));
+    const countEl = document.getElementById('selected-count');
+    const autoFillBtn = document.getElementById('auto-fill-btn');
+    const manualSection = document.getElementById('manual-section');
+    const autoSection = document.getElementById('auto-section');
+    const modeInputs = document.querySelectorAll('input[name="mode"]');
+    const MAX = 6;
+
+    function getChecked() {
+      return checkboxes.filter(cb => cb.checked);
+    }
+
+    function updateCount() {
+      const checked = getChecked();
+      countEl.textContent = checked.length;
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', function () {
+        const checked = getChecked();
+        if (checked.length > MAX) {
+          this.checked = false;
+          alert('최대 6개까지만 선택할 수 있어요.');
+        }
+        updateCount();
+      });
+    });
+
+    autoFillBtn.addEventListener('click', function () {
+      const checked = getChecked();
+      const need = MAX - checked.length;
+
+      if (need <= 0) {
+        alert('이미 6개가 선택되어 있어요.');
+        return;
+      }
+
+      // 아직 체크되지 않은 번호들 중에서 랜덤으로 need개 선택
+      const unchecked = checkboxes.filter(cb => !cb.checked);
+      const picks = shuffle(unchecked).slice(0, need);
+      picks.forEach(cb => { cb.checked = true; });
+
+      updateCount();
+    });
+
+    function applyModeUI() {
+      const selectedMode = document.querySelector('input[name="mode"]:checked')?.value || 'manual';
+      if (selectedMode === 'auto') {
+        manualSection.classList.add('hidden');
+        autoSection.classList.remove('hidden');
+      } else {
+        manualSection.classList.remove('hidden');
+        autoSection.classList.add('hidden');
+      }
+    }
+
+    modeInputs.forEach(input => {
+      input.addEventListener('change', applyModeUI);
+    });
+
+    updateCount();
+    applyModeUI();
+  })();
+</script>
+</body>
+</html>

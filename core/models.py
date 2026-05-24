@@ -1,11 +1,11 @@
 from django.db import models
 import uuid
-
+from django.contrib.postgres.fields import ArrayField
 # Create your models here.
 class LotteryRound(models.Model):
     round_number = models.IntegerField(unique=True)
     draw_date = models.DateTimeField()
-    numbers = models.ArrayField(models.IntegerField(), size=6)
+    win_numbers = ArrayField(models.IntegerField(), size=6)
     bonus_number = models.IntegerField()
     is_drawn = models.BooleanField(default=False)
 
@@ -14,7 +14,6 @@ class LotteryRound(models.Model):
     
 class Purchase(models.Model):
     round = models.ForeignKey(LotteryRound, on_delete=models.CASCADE)
-    numbers = models.ArrayField(models.IntegerField(), size=6)
     purchase_date = models.DateTimeField(auto_now_add=True)
     purchase_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -24,7 +23,7 @@ class Purchase(models.Model):
 class LottoTicket(models.Model):
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
     ticket_number = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    numbers = models.ArrayField(models.IntegerField(), size=6)
+    numbers = ArrayField(models.IntegerField(), size=6)
 
     def __str__(self):
         return f"Ticket {self.ticket_number} for Purchase {self.purchase.id}"   

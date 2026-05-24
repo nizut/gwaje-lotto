@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>추첨 실행</title>
+  <style>
+    body { font-family: sans-serif; max-width: 980px; margin: 24px auto; padding: 0 12px; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 14px; margin: 14px 0; }
+    .muted { color: #666; }
+    .message { padding: 10px 12px; border-radius: 8px; margin: 10px 0; }
+    .message.success { background: #e8f5e9; color: #1b5e20; }
+    .message.info { background: #e3f2fd; color: #0d47a1; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    button { padding: 10px 14px; }
+    .ticket { border-top: 1px dashed #ddd; padding-top: 8px; margin-top: 8px; }
+    a { color: #0b57d0; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h1>추첨 기능</h1>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="message {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card">
+    <h2>현재 추첨 대상 회차</h2>
+    {% if current_round %}
+      <p><strong>{{ current_round.round_number }}회차</strong></p>
+      <p class="muted">추첨 여부: {% if current_round.is_drawn %}완료{% else %}미완료{% endif %}</p>
+      <p class="muted">현재 저장된 번호: {{ current_round.win_numbers|join:", " }} / 보너스: {{ current_round.bonus_number }}</p>
+    {% else %}
+      <p>현재 추첨 대상 회차가 없습니다.</p>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="actions">
+        <button type="submit">현재 회차 추첨하기</button>
+        <a href="{% url 'lotto_admin:sales_history' %}">판매 내역 보기</a>
+        <a href="{% url 'lotto_admin:winning_history' %}">당첨 내역 보기</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>최근 추첨 완료 회차</h2>
+    {% if latest_drawn_round %}
+      <p><strong>{{ latest_drawn_round.round_number }}회차</strong></p>
+      <p>당첨번호: {{ latest_drawn_round.win_numbers|join:", " }} / 보너스: {{ latest_drawn_round.bonus_number }}</p>
+    {% else %}
+      <p>아직 추첨 완료된 회차가 없습니다.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>최근 당첨 결과</h2>
+    {% for result in latest_winning_results %}
+      <div class="ticket">
+        <p><strong>티켓:</strong> {{ result.ticket.ticket_number }}</p>
+        <p><strong>번호:</strong> {{ result.ticket.numbers|join:", " }}</p>
+        <p><strong>등수:</strong> {{ result.rank|default:"꽝" }}</p>
+      </div>
+    {% empty %}
+      <p>표시할 당첨 결과가 없습니다.</p>
+    {% endfor %}
+  </div>
+</body>
+</html>

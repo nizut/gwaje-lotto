@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>판매 내역</title>
+  <style>
+    body { font-family: sans-serif; max-width: 980px; margin: 24px auto; padding: 0 12px; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 14px; margin: 14px 0; }
+    .summary { display: flex; gap: 16px; flex-wrap: wrap; }
+    .summary div { min-width: 180px; }
+    .purchase { border-top: 1px dashed #ddd; padding-top: 10px; margin-top: 10px; }
+    .ticket { margin: 6px 0; color: #444; }
+    .muted { color: #666; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #f2f2f2; font-size: 12px; }
+    a { color: #0b57d0; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h1>판매 내역 확인</h1>
+
+  <div class="card summary">
+    <div>
+      <div class="muted">총 판매 건수</div>
+      <strong>{{ total_sales_count }}</strong>
+    </div>
+    <div>
+      <div class="muted">총 판매 금액</div>
+      <strong>{{ total_sales_amount }}</strong>
+    </div>
+    <div>
+      <div class="muted">최신 회차</div>
+      {% if latest_round %}
+        <strong>{{ latest_round.round_number }}회차</strong>
+      {% else %}
+        <strong>없음</strong>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>구매 목록</h2>
+    {% for purchase in purchases %}
+      <div class="purchase">
+        <div>
+          <span class="badge">{{ purchase.round.round_number }}회차</span>
+          <strong>구매 ID {{ purchase.id }}</strong>
+        </div>
+        <p class="muted">구매 시각: {{ purchase.purchase_date }}</p>
+        <p class="muted">구매 금액: {{ purchase.purchase_amount }}</p>
+        <p class="muted">티켓 수: {{ purchase.lottoticket_set.all|length }}장</p>
+        {% for ticket in purchase.lottoticket_set.all %}
+          <div class="ticket">- {{ ticket.ticket_number }} / {{ ticket.numbers|join:", " }}</div>
+        {% empty %}
+          <div class="ticket">티켓이 없습니다.</div>
+        {% endfor %}
+      </div>
+    {% empty %}
+      <p>판매 내역이 없습니다.</p>
+    {% endfor %}
+  </div>
+
+  <p>
+    <a href="{% url 'lotto_admin:index' %}">홈으로</a>
+    |
+    <a href="{% url 'lotto_admin:draw_lottery' %}">추첨 화면</a>
+    |
+    <a href="{% url 'lotto_admin:winning_history' %}">당첨 내역</a>
+  </p>
+</body>
+</html>

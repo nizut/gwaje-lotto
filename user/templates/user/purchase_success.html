@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>구매 완료</title>
+  <style>
+    body { font-family: sans-serif; max-width: 760px; margin: 24px auto; padding: 0 12px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 10px 0; }
+    .ticket { padding: 6px 0; border-bottom: 1px dashed #ddd; }
+    .ticket:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+  <h1>구매가 완료되었습니다.</h1>
+
+  <div class="card">
+    <p>구매 ID: {{ purchase.id }}</p>
+    <p>회차: {{ purchase.round.round_number }}</p>
+    <p>구매 시각: {{ purchase.purchase_date }}</p>
+    <p>총 금액: {{ purchase.purchase_amount }}</p>
+    <p>티켓 수: {{ tickets|length }}장</p>
+  </div>
+
+  <h2>생성된 티켓</h2>
+  <div class="card">
+    {% for ticket in tickets %}
+      <div class="ticket">
+        <strong>#{{ forloop.counter }}</strong>
+        : {{ ticket.numbers|join:", " }} | 티켓 번호: {{ ticket.ticket_number }}
+      </div>
+    {% empty %}
+      <p>표시할 티켓이 없습니다.</p>
+    {% endfor %}
+  </div>
+
+  <p>
+    <a href="{% url 'user:purchase' %}">다시 구매하기</a>
+    |
+    <a href="{% url 'user:index' %}">홈으로 이동</a>
+  </p>
+</body>
+</html>

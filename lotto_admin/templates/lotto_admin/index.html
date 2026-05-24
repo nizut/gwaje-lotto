@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>lotto-admin</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 900px;
+      margin: 24px auto;
+      padding: 0 12px;
+      background: #fafafa;
+    }
+
+    .hero {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .title {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .desc {
+      margin: 0 0 20px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .menu a {
+      display: block;
+      padding: 16px 18px;
+      border: 1px solid #d7d7d7;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #111;
+      background: #fff;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .menu a:hover {
+      transform: translateY(-2px);
+      border-color: #9e9e9e;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .menu strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+
+    .menu span {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .footer {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <main class="hero">
+    <h1 class="title">lotto-admin</h1>
+    <p class="desc">
+      판매 내역을 확인하고, 추첨을 실행하고, 당첨 내역을 조회하는 관리자 페이지입니다.
+    </p>
+
+    <section class="menu">
+      <a href="{% url sales_url_name %}">
+        <strong>판매 내역</strong>
+        <span>구매 목록과 총 판매 금액을 확인합니다.</span>
+      </a>
+
+      <a href="{% url draw_url_name %}">
+        <strong>추첨 기능</strong>
+        <span>현재 회차를 추첨하고 다음 회차를 준비합니다.</span>
+      </a>
+
+      <a href="{% url winning_url_name %}">
+        <strong>당첨 내역</strong>
+        <span>회차별 티켓 결과와 등수를 확인합니다.</span>
+      </a>
+    </section>
+
+    <div class="footer">
+      홈으로 돌아가려면 사용자 화면을 이용하세요.
+    </div>
+  </main>
+</body>
+</html>
