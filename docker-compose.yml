@@ -1,5 +1,3 @@
-version: '1'
-
 services:
   db:
     image: postgres:18.4
@@ -8,7 +6,7 @@ services:
       POSTGRES_USER: lotto
       POSTGRES_PASSWORD: lotto
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql
 
   web:
     build: .

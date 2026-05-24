@@ -85,31 +85,37 @@ def check(request):
     purchase_id = request.GET.get("purchase_id", "").strip()
     ticket_number = request.GET.get("ticket_number", "").strip()
 
-    latest_drawn_round = LotteryRound.objects.filter(is_drawn=True).order_by("-round_number").first()
     result = None
     error_message = None
 
     if request.method == "GET" and (purchase_id or ticket_number):
         tickets = []
 
+        selected_round = None
+
         if purchase_id:
             try:
-                purchase_obj = Purchase.objects.get(id=purchase_id)
+                purchase_obj = Purchase.objects.select_related("round").get(id=purchase_id)
             except (Purchase.DoesNotExist, ValueError):
                 error_message = "구매 ID를 찾을 수 없습니다."
             else:
                 tickets = list(purchase_obj.lottoticket_set.all().order_by("id"))
+                selected_round = purchase_obj.round
 
         elif ticket_number:
             try:
-                tickets = [LottoTicket.objects.select_related("purchase", "purchase__round").get(ticket_number=ticket_number)]
+                ticket = LottoTicket.objects.select_related("purchase", "purchase__round").get(ticket_number=ticket_number)
+                tickets = [ticket]
+                selected_round = ticket.purchase.round
             except LottoTicket.DoesNotExist:
                 error_message = "티켓 번호를 찾을 수 없습니다."
 
-        if tickets and latest_drawn_round:
+        if tickets and selected_round and not selected_round.is_drawn:
+            error_message = "아직 추첨을 안했습니다."
+        elif tickets and selected_round and selected_round.is_drawn:
             result_tickets = []
             for ticket in tickets:
-                rank = _calculate_rank(ticket.numbers, latest_drawn_round.win_numbers, latest_drawn_round.bonus_number)
+                rank = _calculate_rank(ticket.numbers, selected_round.win_numbers, selected_round.bonus_number)
                 result_tickets.append(
                     {
                         "ticket": ticket,
@@ -118,11 +124,9 @@ def check(request):
                 )
 
             result = {
-                "round": latest_drawn_round,
+                "round": selected_round,
                 "tickets": result_tickets,
             }
-        elif tickets and not latest_drawn_round:
-            error_message = "아직 추첨 완료된 회차가 없습니다."
 
     return render(
         request,
