@@ -12,7 +12,7 @@ services:
 			- db_data:/var/lib/postgresql
 
 	web:
-		build: .
+		image: nizut/lotto:latest
 		ports:
 			- "8000:8000"
 		environment:
