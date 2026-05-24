@@ -77,17 +77,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 env = environ.Env()
+# 로컬 개발에서 .env 파일을 사용하려면 주석 해제
 environ.Env.read_env(env_file=BASE_DIR / '.env')
 
+# `DATABASE_URL` 환경변수를 필수로 사용합니다. 설정이 없으면 예외가 발생합니다.
+# 예: postgres://user:password@db:5432/dbname
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'HOST': env('DB_HOST'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'PORT': '5432',
-    }
+    'default': env.db('DATABASE_URL')
 }
 
 
